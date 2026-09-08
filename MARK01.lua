@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.10",
+	Version = "0.0.11",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -19,26 +19,26 @@ local CONFIG = {
 	},
 	Modal = {
 		Size = UDim2.fromOffset(920, 680),
-		BackgroundColor = Color3.fromRGB(40, 40, 40),
-		HeaderHeight = 48,
-		SidebarWidth = 180,
-		HeaderColor = Color3.fromRGB(28, 28, 28),
-		SidebarColor = Color3.fromRGB(34, 34, 34),
-		ContentColor = Color3.fromRGB(45, 45, 45),
-		MenuColor = Color3.fromRGB(48, 48, 48),
-		MenuActiveColor = Color3.fromRGB(82, 196, 72),
-		LogTextColor = Color3.fromRGB(220, 220, 220),
-		LogWarningColor = Color3.fromRGB(235, 190, 80),
-		LogErrorColor = Color3.fromRGB(235, 95, 95),
+		BackgroundColor = Color3.fromRGB(18, 20, 24),
+		HeaderHeight = 56,
+		SidebarWidth = 200,
+		HeaderColor = Color3.fromRGB(18, 20, 24),
+		SidebarColor = Color3.fromRGB(18, 20, 24),
+		ContentColor = Color3.fromRGB(22, 24, 29),
+		MenuColor = Color3.fromRGB(18, 20, 24),
+		MenuActiveColor = Color3.fromRGB(57, 190, 128),
+		LogTextColor = Color3.fromRGB(209, 213, 219),
+		LogWarningColor = Color3.fromRGB(251, 191, 36),
+		LogErrorColor = Color3.fromRGB(248, 113, 113),
 		MaxLogs = 200,
 	},
 	WindowButton = {
-		Size = UDim2.fromOffset(36, 30),
-		TextSize = 20,
-		MinimizeColor = Color3.fromRGB(70, 70, 70),
-		CloseColor = Color3.fromRGB(190, 55, 55),
-		HoverColor = Color3.fromRGB(220, 70, 70),
-		CornerRadius = 5,
+		Size = UDim2.fromOffset(32, 32),
+		TextSize = 18,
+		MinimizeColor = Color3.fromRGB(42, 46, 54),
+		CloseColor = Color3.fromRGB(42, 46, 54),
+		HoverColor = Color3.fromRGB(220, 76, 76),
+		CornerRadius = 8,
 	},
 	DragThreshold = 5,
 }
@@ -241,12 +241,16 @@ local function createModal(gui, playerESP)
 	modal.Position = UDim2.new(0.5, -460, 0.5, -340)
 	modal.BackgroundColor3 = CONFIG.Modal.BackgroundColor
 	modal.BorderSizePixel = 0
+	modal.ClipsDescendants = true
 	modal.Visible = false
 	modal.Parent = gui
+	local modalCorner = Instance.new("UICorner")
+	modalCorner.CornerRadius = UDim.new(0, 14)
+	modalCorner.Parent = modal
 	local function createToggleRow(parent, name, labelText, position, onToggle)
 		local row = Instance.new("Frame")
 		row.Name = name .. "Row"
-		row.Size = UDim2.new(1, -48, 0, 38)
+		row.Size = UDim2.new(1, -64, 0, 42)
 		row.Position = position
 		row.BackgroundTransparency = 1
 		row.Visible = false
@@ -256,15 +260,15 @@ local function createModal(gui, playerESP)
 		label.Size = UDim2.new(1, -76, 1, 0)
 		label.BackgroundTransparency = 1
 		label.Text = labelText
-		label.Font = Enum.Font.GothamMedium
-		label.TextColor3 = Color3.fromRGB(235, 235, 235)
-		label.TextSize = 15
+		label.Font = Enum.Font.Gotham
+		label.TextColor3 = Color3.fromRGB(226, 232, 240)
+		label.TextSize = 14
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.Parent = row
 		local switch = Instance.new("TextButton")
 		switch.Name = name
-		switch.Size = UDim2.fromOffset(52, 26)
-		switch.Position = UDim2.new(1, -52, 0.5, -13)
+		switch.Size = UDim2.fromOffset(46, 24)
+		switch.Position = UDim2.new(1, -46, 0.5, -12)
 		switch.Text = ""
 		switch.BackgroundColor3 = CONFIG.Modal.MenuColor
 		switch.BorderSizePixel = 0
@@ -275,7 +279,7 @@ local function createModal(gui, playerESP)
 		switchCorner.Parent = switch
 		local knob = Instance.new("Frame")
 		knob.Name = "Knob"
-		knob.Size = UDim2.fromOffset(20, 20)
+		knob.Size = UDim2.fromOffset(18, 18)
 		knob.Position = UDim2.fromOffset(3, 3)
 		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		knob.BorderSizePixel = 0
@@ -287,7 +291,7 @@ local function createModal(gui, playerESP)
 		switch.MouseButton1Click:Connect(function()
 			enabled = not enabled
 			switch.BackgroundColor3 = enabled and CONFIG.Modal.MenuActiveColor or CONFIG.Modal.MenuColor
-			knob.Position = enabled and UDim2.fromOffset(29, 3) or UDim2.fromOffset(3, 3)
+			knob.Position = enabled and UDim2.fromOffset(25, 3) or UDim2.fromOffset(3, 3)
 			onToggle(enabled)
 		end)
 		return row
@@ -298,27 +302,34 @@ local function createModal(gui, playerESP)
 	header.BackgroundColor3 = CONFIG.Modal.HeaderColor
 	header.BorderSizePixel = 0
 	header.Parent = modal
+	local headerDivider = Instance.new("Frame")
+	headerDivider.Name = "HeaderDivider"
+	headerDivider.Size = UDim2.new(1, 0, 0, 1)
+	headerDivider.Position = UDim2.new(0, 0, 1, -1)
+	headerDivider.BackgroundColor3 = Color3.fromRGB(45, 50, 60)
+	headerDivider.BorderSizePixel = 0
+	headerDivider.Parent = header
 	local logo = Instance.new("TextLabel")
 	logo.Name = "Logo"
-	logo.Size = UDim2.fromOffset(160, CONFIG.Modal.HeaderHeight)
-	logo.Position = UDim2.fromOffset(16, 0)
+	logo.Size = UDim2.fromOffset(180, CONFIG.Modal.HeaderHeight)
+	logo.Position = UDim2.fromOffset(20, 0)
 	logo.BackgroundTransparency = 1
 	logo.Text = "MARK 01"
 	logo.Font = Enum.Font.GothamBold
 	logo.TextColor3 = Color3.fromRGB(255, 255, 255)
-	logo.TextSize = 20
+	logo.TextSize = 18
 	logo.TextXAlignment = Enum.TextXAlignment.Left
 	logo.Parent = header
 	local headerStatus = Instance.new("TextLabel")
 	headerStatus.Name = "HeaderStatus"
-	headerStatus.Size = UDim2.fromOffset(360, CONFIG.Modal.HeaderHeight)
-	headerStatus.Position = UDim2.new(0.5, -180, 0, 0)
+	headerStatus.Size = UDim2.fromOffset(250, CONFIG.Modal.HeaderHeight)
+	headerStatus.Position = UDim2.new(1, -340, 0, 0)
 	headerStatus.BackgroundTransparency = 1
 	headerStatus.Text = "FPS: --  |  Ping: --  |  Ver: " .. CONFIG.Version
-	headerStatus.Font = Enum.Font.Code
-	headerStatus.TextColor3 = Color3.fromRGB(170, 170, 170)
-	headerStatus.TextSize = 14
-	headerStatus.TextXAlignment = Enum.TextXAlignment.Center
+	headerStatus.Font = Enum.Font.Gotham
+	headerStatus.TextColor3 = Color3.fromRGB(148, 163, 184)
+	headerStatus.TextSize = 12
+	headerStatus.TextXAlignment = Enum.TextXAlignment.Right
 	headerStatus.Parent = header
 	local frames = 0
 	local elapsed = 0
@@ -347,15 +358,22 @@ local function createModal(gui, playerESP)
 	sidebar.BackgroundColor3 = CONFIG.Modal.SidebarColor
 	sidebar.BorderSizePixel = 0
 	sidebar.Parent = modal
+	local sidebarDivider = Instance.new("Frame")
+	sidebarDivider.Name = "SidebarDivider"
+	sidebarDivider.Size = UDim2.new(0, 1, 1, 0)
+	sidebarDivider.Position = UDim2.new(1, -1, 0, 0)
+	sidebarDivider.BackgroundColor3 = Color3.fromRGB(45, 50, 60)
+	sidebarDivider.BorderSizePixel = 0
+	sidebarDivider.Parent = sidebar
 	local menuTitle = Instance.new("TextLabel")
 	menuTitle.Name = "MenuTitle"
 	menuTitle.Size = UDim2.new(1, -24, 0, 32)
-	menuTitle.Position = UDim2.fromOffset(12, 16)
+	menuTitle.Position = UDim2.fromOffset(20, 18)
 	menuTitle.BackgroundTransparency = 1
 	menuTitle.Text = "MENU"
-	menuTitle.Font = Enum.Font.GothamBold
-	menuTitle.TextColor3 = Color3.fromRGB(145, 145, 145)
-	menuTitle.TextSize = 12
+	menuTitle.Font = Enum.Font.GothamMedium
+	menuTitle.TextColor3 = Color3.fromRGB(100, 116, 139)
+	menuTitle.TextSize = 11
 	menuTitle.TextXAlignment = Enum.TextXAlignment.Left
 	menuTitle.Parent = sidebar
 	local content = Instance.new("Frame")
@@ -367,37 +385,40 @@ local function createModal(gui, playerESP)
 	content.Parent = modal
 	local contentTitle = Instance.new("TextLabel")
 	contentTitle.Name = "ContentTitle"
-	contentTitle.Size = UDim2.new(1, -48, 0, 42)
-	contentTitle.Position = UDim2.fromOffset(24, 24)
+	contentTitle.Size = UDim2.new(1, -64, 0, 38)
+	contentTitle.Position = UDim2.fromOffset(32, 28)
 	contentTitle.BackgroundTransparency = 1
 	contentTitle.Text = "Home"
 	contentTitle.Font = Enum.Font.GothamBold
 	contentTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-	contentTitle.TextSize = 28
+	contentTitle.TextSize = 24
 	contentTitle.TextXAlignment = Enum.TextXAlignment.Left
 	contentTitle.Parent = content
 	local contentBody = Instance.new("TextLabel")
 	contentBody.Name = "ContentBody"
-	contentBody.Size = UDim2.new(1, -48, 0, 32)
-	contentBody.Position = UDim2.fromOffset(24, 72)
+	contentBody.Size = UDim2.new(1, -64, 0, 28)
+	contentBody.Position = UDim2.fromOffset(32, 68)
 	contentBody.BackgroundTransparency = 1
 	contentBody.Text = "Welcome to MARK 01"
 	contentBody.Font = Enum.Font.Gotham
-	contentBody.TextColor3 = Color3.fromRGB(190, 190, 190)
-	contentBody.TextSize = 16
+	contentBody.TextColor3 = Color3.fromRGB(148, 163, 184)
+	contentBody.TextSize = 14
 	contentBody.TextXAlignment = Enum.TextXAlignment.Left
 	contentBody.Parent = content
 	local logsList = Instance.new("ScrollingFrame")
 	logsList.Name = "LogsList"
-	logsList.Size = UDim2.new(1, -48, 1, -120)
-	logsList.Position = UDim2.fromOffset(24, 104)
-	logsList.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+	logsList.Size = UDim2.new(1, -64, 1, -128)
+	logsList.Position = UDim2.fromOffset(32, 104)
+	logsList.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
 	logsList.BorderSizePixel = 0
-	logsList.ScrollBarThickness = 6
-	logsList.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+	logsList.ScrollBarThickness = 4
+	logsList.ScrollBarImageColor3 = Color3.fromRGB(71, 85, 105)
 	logsList.CanvasSize = UDim2.fromOffset(0, 0)
 	logsList.Visible = false
 	logsList.Parent = content
+	local logsCorner = Instance.new("UICorner")
+	logsCorner.CornerRadius = UDim.new(0, 10)
+	logsCorner.Parent = logsList
 	local logsPadding = Instance.new("UIPadding")
 	logsPadding.PaddingTop = UDim.new(0, 8)
 	logsPadding.PaddingBottom = UDim.new(0, 8)
@@ -440,7 +461,7 @@ local function createModal(gui, playerESP)
 		logLabel.AutomaticSize = Enum.AutomaticSize.Y
 		logLabel.BackgroundTransparency = 1
 		logLabel.Text = message
-		logLabel.Font = Enum.Font.Code
+		logLabel.Font = Enum.Font.Gotham
 		logLabel.TextColor3 = getLogColor(messageType)
 		logLabel.TextSize = 14
 		logLabel.TextWrapped = true
@@ -477,10 +498,10 @@ local function createModal(gui, playerESP)
 	LogService.MessageOut:Connect(function(message, messageType)
 		addLog(message, messageType)
 	end)
-	local playerToggle = createToggleRow(content, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(24, 120), function(enabled)
+	local playerToggle = createToggleRow(content, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(32, 120), function(enabled)
 		playerESP:SetEnabled(enabled)
 	end)
-	local highlightToggle = createToggleRow(content, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(24, 166), function(enabled)
+	local highlightToggle = createToggleRow(content, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(32, 170), function(enabled)
 		playerESP:SetHighlightEnabled(enabled)
 	end)
 	local menuButtons = {}
@@ -493,29 +514,31 @@ local function createModal(gui, playerESP)
 	for index, item in ipairs(menuItems) do
 		local menuButton = Instance.new("TextButton")
 		menuButton.Name = item.Name .. "MenuButton"
-		menuButton.Size = UDim2.new(1, -24, 0, 42)
-		menuButton.Position = UDim2.fromOffset(12, 52 + ((index - 1) * 48))
+		menuButton.Size = UDim2.new(1, -24, 0, 40)
+		menuButton.Position = UDim2.fromOffset(12, 56 + ((index - 1) * 44))
 		menuButton.Text = item.Name
-		menuButton.Font = Enum.Font.GothamMedium
-		menuButton.TextColor3 = Color3.fromRGB(235, 235, 235)
-		menuButton.TextSize = 15
+		menuButton.Font = Enum.Font.Gotham
+		menuButton.TextColor3 = index == 1 and Color3.fromRGB(236, 253, 245) or Color3.fromRGB(148, 163, 184)
+		menuButton.TextSize = 14
 		menuButton.TextXAlignment = Enum.TextXAlignment.Left
 		menuButton.BackgroundColor3 = index == 1 and CONFIG.Modal.MenuActiveColor or CONFIG.Modal.MenuColor
 		menuButton.BorderSizePixel = 0
 		menuButton.AutoButtonColor = false
 		menuButton.Parent = sidebar
 		local menuPadding = Instance.new("UIPadding")
-		menuPadding.PaddingLeft = UDim.new(0, 14)
+		menuPadding.PaddingLeft = UDim.new(0, 16)
 		menuPadding.Parent = menuButton
 		local menuCorner = Instance.new("UICorner")
-		menuCorner.CornerRadius = UDim.new(0, 5)
+		menuCorner.CornerRadius = UDim.new(0, 8)
 		menuCorner.Parent = menuButton
 		menuButtons[index] = menuButton
 		menuButton.MouseButton1Click:Connect(function()
 			for _, button in ipairs(menuButtons) do
 				button.BackgroundColor3 = CONFIG.Modal.MenuColor
+				button.TextColor3 = Color3.fromRGB(148, 163, 184)
 			end
 			menuButton.BackgroundColor3 = CONFIG.Modal.MenuActiveColor
+			menuButton.TextColor3 = Color3.fromRGB(236, 253, 245)
 			contentTitle.Text = item.Name
 			contentBody.Text = item.Description
 			logsList.Visible = item.Name == "Logs"
