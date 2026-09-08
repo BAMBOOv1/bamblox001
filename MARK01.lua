@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.9",
+	Version = "0.0.10",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -243,6 +243,55 @@ local function createModal(gui, playerESP)
 	modal.BorderSizePixel = 0
 	modal.Visible = false
 	modal.Parent = gui
+	local function createToggleRow(parent, name, labelText, position, onToggle)
+		local row = Instance.new("Frame")
+		row.Name = name .. "Row"
+		row.Size = UDim2.new(1, -48, 0, 38)
+		row.Position = position
+		row.BackgroundTransparency = 1
+		row.Visible = false
+		row.Parent = parent
+		local label = Instance.new("TextLabel")
+		label.Name = name .. "Label"
+		label.Size = UDim2.new(1, -76, 1, 0)
+		label.BackgroundTransparency = 1
+		label.Text = labelText
+		label.Font = Enum.Font.GothamMedium
+		label.TextColor3 = Color3.fromRGB(235, 235, 235)
+		label.TextSize = 15
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Parent = row
+		local switch = Instance.new("TextButton")
+		switch.Name = name
+		switch.Size = UDim2.fromOffset(52, 26)
+		switch.Position = UDim2.new(1, -52, 0.5, -13)
+		switch.Text = ""
+		switch.BackgroundColor3 = CONFIG.Modal.MenuColor
+		switch.BorderSizePixel = 0
+		switch.AutoButtonColor = false
+		switch.Parent = row
+		local switchCorner = Instance.new("UICorner")
+		switchCorner.CornerRadius = UDim.new(1, 0)
+		switchCorner.Parent = switch
+		local knob = Instance.new("Frame")
+		knob.Name = "Knob"
+		knob.Size = UDim2.fromOffset(20, 20)
+		knob.Position = UDim2.fromOffset(3, 3)
+		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		knob.BorderSizePixel = 0
+		knob.Parent = switch
+		local knobCorner = Instance.new("UICorner")
+		knobCorner.CornerRadius = UDim.new(1, 0)
+		knobCorner.Parent = knob
+		local enabled = false
+		switch.MouseButton1Click:Connect(function()
+			enabled = not enabled
+			switch.BackgroundColor3 = enabled and CONFIG.Modal.MenuActiveColor or CONFIG.Modal.MenuColor
+			knob.Position = enabled and UDim2.fromOffset(29, 3) or UDim2.fromOffset(3, 3)
+			onToggle(enabled)
+		end)
+		return row
+	end
 	local header = Instance.new("Frame")
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, CONFIG.Modal.HeaderHeight)
@@ -428,47 +477,11 @@ local function createModal(gui, playerESP)
 	LogService.MessageOut:Connect(function(message, messageType)
 		addLog(message, messageType)
 	end)
-	local playerToggle = Instance.new("TextButton")
-	playerToggle.Name = "PlayerNamesToggle"
-	playerToggle.Size = UDim2.fromOffset(180, 38)
-	playerToggle.Position = UDim2.fromOffset(24, 120)
-	playerToggle.Text = "ESP: OFF"
-	playerToggle.Font = Enum.Font.GothamBold
-	playerToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-	playerToggle.TextSize = 14
-	playerToggle.BackgroundColor3 = CONFIG.Modal.MenuColor
-	playerToggle.BorderSizePixel = 0
-	playerToggle.AutoButtonColor = true
-	playerToggle.Visible = false
-	playerToggle.Parent = content
-	local highlightToggle = Instance.new("TextButton")
-	highlightToggle.Name = "PlayerHighlightToggle"
-	highlightToggle.Size = UDim2.fromOffset(180, 38)
-	highlightToggle.Position = UDim2.fromOffset(24, 166)
-	highlightToggle.Text = "Highlight: OFF"
-	highlightToggle.Font = Enum.Font.GothamBold
-	highlightToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-	highlightToggle.TextSize = 14
-	highlightToggle.BackgroundColor3 = CONFIG.Modal.MenuColor
-	highlightToggle.BorderSizePixel = 0
-	highlightToggle.AutoButtonColor = true
-	highlightToggle.Visible = false
-	highlightToggle.Parent = content
-	local highlightCorner = Instance.new("UICorner")
-	highlightCorner.CornerRadius = UDim.new(0, 5)
-	highlightCorner.Parent = highlightToggle
-	highlightToggle.MouseButton1Click:Connect(function()
-		local enabled = playerESP:ToggleHighlight()
-		highlightToggle.Text = enabled and "Highlight: ON" or "Highlight: OFF"
-		highlightToggle.BackgroundColor3 = enabled and CONFIG.Modal.MenuActiveColor or CONFIG.Modal.MenuColor
+	local playerToggle = createToggleRow(content, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(24, 120), function(enabled)
+		playerESP:SetEnabled(enabled)
 	end)
-	local playerToggleCorner = Instance.new("UICorner")
-	playerToggleCorner.CornerRadius = UDim.new(0, 5)
-	playerToggleCorner.Parent = playerToggle
-	playerToggle.MouseButton1Click:Connect(function()
-		local enabled = playerESP:Toggle()
-		playerToggle.Text = enabled and "ESP: ON" or "ESP: OFF"
-		playerToggle.BackgroundColor3 = enabled and CONFIG.Modal.MenuActiveColor or CONFIG.Modal.MenuColor
+	local highlightToggle = createToggleRow(content, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(24, 166), function(enabled)
+		playerESP:SetHighlightEnabled(enabled)
 	end)
 	local menuButtons = {}
 	local menuItems = {
@@ -476,7 +489,6 @@ local function createModal(gui, playerESP)
 		{Name = "Settings", Description = "Configure your preferences"},
 		{Name = "Logs", Description = "Client output logs"},
 		{Name = "Misc", Description = "Extra map testing tools"},
-		{Name = "Lighting", Description = "Lighting controls for map testing"},
 	}
 	for index, item in ipairs(menuItems) do
 		local menuButton = Instance.new("TextButton")
