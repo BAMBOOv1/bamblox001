@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.2",
+	Version = "0.0.3",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -81,7 +81,90 @@ local function createToggleButton(gui)
 	corner.Parent = button
 	return button
 end
-local function createModal(gui)
+local function createPlayerESP()
+	local esp = {
+		Enabled = false,
+		Connections = {},
+		CharacterConnections = {},
+	}
+	local function removePlayer(player)
+		local connection = esp.CharacterConnections[player]
+		if connection then
+			connection:Disconnect()
+			esp.CharacterConnections[player] = nil
+		end
+		if player.Character then
+			local head = player.Character:FindFirstChild("Head")
+			local tag = head and head:FindFirstChild("MARK01_PlayerName")
+			if tag then
+				tag:Destroy()
+			end
+		end
+	end
+	local function addPlayer(player)
+		if player == Players.LocalPlayer or not esp.Enabled then
+			return
+		end
+		local function attach(character)
+			local head = character:WaitForChild("Head", 5)
+			if not head or not esp.Enabled or not head.Parent then
+				return
+			end
+			removePlayer(player)
+			local tag = Instance.new("BillboardGui")
+			tag.Name = "MARK01_PlayerName"
+			tag.Adornee = head
+			tag.Size = UDim2.fromOffset(180, 32)
+			tag.StudsOffset = Vector3.new(0, 2.5, 0)
+			tag.AlwaysOnTop = true
+			tag.MaxDistance = 250
+			tag.Parent = head
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.fromScale(1, 1)
+			label.BackgroundTransparency = 1
+			label.Text = player.DisplayName .. " (" .. player.Name .. ")"
+			label.Font = Enum.Font.GothamBold
+			label.TextColor3 = Color3.fromRGB(255, 255, 255)
+			label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+			label.TextStrokeTransparency = 0.35
+			label.TextSize = 14
+			label.Parent = tag
+		end
+		if player.Character then
+			task.spawn(attach, player.Character)
+		end
+		esp.CharacterConnections[player] = player.CharacterAdded:Connect(attach)
+	end
+	function esp:SetEnabled(enabled)
+		self.Enabled = enabled
+		if enabled then
+			for _, target in ipairs(Players:GetPlayers()) do
+				addPlayer(target)
+			end
+		else
+			for _, target in ipairs(Players:GetPlayers()) do
+				removePlayer(target)
+			end
+		end
+	end
+	function esp:Toggle()
+		self:SetEnabled(not self.Enabled)
+		return self.Enabled
+	end
+	function esp:Destroy()
+		self:SetEnabled(false)
+		for _, connection in ipairs(self.Connections) do
+			connection:Disconnect()
+		end
+	end
+	table.insert(esp.Connections, Players.PlayerAdded:Connect(addPlayer))
+	table.insert(esp.Connections, Players.PlayerRemoving:Connect(function(player)
+		removePlayer(player)
+		esp.CharacterConnections[player] = nil
+	end))
+	return esp
+end
+local function createModal(gui, playerESP)
 	local modal = Instance.new("Frame")
 	modal.Name = "Modal"
 	modal.Size = CONFIG.Modal.Size
@@ -275,11 +358,33 @@ local function createModal(gui)
 	LogService.MessageOut:Connect(function(message, messageType)
 		addLog(message, messageType)
 	end)
+	local playerToggle = Instance.new("TextButton")
+	playerToggle.Name = "PlayerNamesToggle"
+	playerToggle.Size = UDim2.fromOffset(180, 38)
+	playerToggle.Position = UDim2.fromOffset(24, 120)
+	playerToggle.Text = "ESP: OFF"
+	playerToggle.Font = Enum.Font.GothamBold
+	playerToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	playerToggle.TextSize = 14
+	playerToggle.BackgroundColor3 = CONFIG.Modal.MenuColor
+	playerToggle.BorderSizePixel = 0
+	playerToggle.AutoButtonColor = true
+	playerToggle.Visible = false
+	playerToggle.Parent = content
+	local playerToggleCorner = Instance.new("UICorner")
+	playerToggleCorner.CornerRadius = UDim.new(0, 5)
+	playerToggleCorner.Parent = playerToggle
+	playerToggle.MouseButton1Click:Connect(function()
+		local enabled = playerESP:Toggle()
+		playerToggle.Text = enabled and "ESP: ON" or "ESP: OFF"
+		playerToggle.BackgroundColor3 = enabled and CONFIG.Modal.MenuActiveColor or CONFIG.Modal.MenuColor
+	end)
 	local menuButtons = {}
 	local menuItems = {
 		{Name = "Home", Description = "Welcome to MARK 01"},
 		{Name = "Settings", Description = "Configure your preferences"},
 		{Name = "Logs", Description = "Client output logs"},
+		{Name = "Misc", Description = "Extra map testing tools"},
 	}
 	for index, item in ipairs(menuItems) do
 		local menuButton = Instance.new("TextButton")
@@ -311,6 +416,7 @@ local function createModal(gui)
 			contentBody.Text = item.Description
 			logsList.Visible = item.Name == "Logs"
 			contentBody.Visible = item.Name ~= "Logs"
+			playerToggle.Visible = item.Name == "Misc"
 		end)
 	end
 	local minimizeButton = Instance.new("TextButton")
@@ -450,13 +556,15 @@ end
 local function createUI()
 	local gui = createScreenGui()
 	local toggleButton = createToggleButton(gui)
-	local modal, header, minimizeButton, closeButton = createModal(gui)
+	local playerESP = createPlayerESP()
+	local modal, header, minimizeButton, closeButton = createModal(gui, playerESP)
 	setupDragAndClick(toggleButton, modal)
 	setupHeaderDrag(header, modal)
 	minimizeButton.MouseButton1Click:Connect(function()
 		setModalState(modal, false)
 	end)
 	closeButton.MouseButton1Click:Connect(function()
+		playerESP:Destroy()
 		gui:Destroy()
 	end)
 end
