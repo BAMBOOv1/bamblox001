@@ -8,7 +8,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.7",
+	Version = "0.0.8",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -85,8 +85,10 @@ end
 local function createPlayerESP()
 	local esp = {
 		Enabled = false,
+		HighlightEnabled = false,
 		Connections = {},
 		CharacterConnections = {},
+		HighlightCharacterConnections = {},
 	}
 	local function removePlayer(player)
 		local connection = esp.CharacterConnections[player]
@@ -99,6 +101,19 @@ local function createPlayerESP()
 			local tag = head and head:FindFirstChild("MARK01_PlayerName")
 			if tag then
 				tag:Destroy()
+			end
+		end
+	end
+	local function removeHighlight(player)
+		local connection = esp.HighlightCharacterConnections[player]
+		if connection then
+			connection:Disconnect()
+			esp.HighlightCharacterConnections[player] = nil
+		end
+		if player.Character then
+			local highlight = player.Character:FindFirstChild("MARK01_PlayerHighlight")
+			if highlight then
+				highlight:Destroy()
 			end
 		end
 	end
@@ -136,6 +151,30 @@ local function createPlayerESP()
 		end
 		esp.CharacterConnections[player] = player.CharacterAdded:Connect(attach)
 	end
+	local function addHighlight(player)
+		if not esp.HighlightEnabled then
+			return
+		end
+		local function attach(character)
+			if not character or not esp.HighlightEnabled then
+				return
+			end
+			removeHighlight(player)
+			local highlight = Instance.new("Highlight")
+			highlight.Name = "MARK01_PlayerHighlight"
+			highlight.Adornee = character
+			highlight.FillColor = player == Players.LocalPlayer and Color3.fromRGB(50, 220, 90) or Color3.fromRGB(220, 60, 60)
+			highlight.OutlineColor = highlight.FillColor
+			highlight.FillTransparency = 0.65
+			highlight.OutlineTransparency = 0
+			highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+			highlight.Parent = character
+		end
+		if player.Character then
+			attach(player.Character)
+		end
+		esp.HighlightCharacterConnections[player] = player.CharacterAdded:Connect(attach)
+	end
 	function esp:SetEnabled(enabled)
 		self.Enabled = enabled
 		if enabled then
@@ -152,16 +191,38 @@ local function createPlayerESP()
 		self:SetEnabled(not self.Enabled)
 		return self.Enabled
 	end
+	function esp:SetHighlightEnabled(enabled)
+		self.HighlightEnabled = enabled
+		if enabled then
+			for _, target in ipairs(Players:GetPlayers()) do
+				addHighlight(target)
+			end
+		else
+			for _, target in ipairs(Players:GetPlayers()) do
+				removeHighlight(target)
+			end
+		end
+	end
+	function esp:ToggleHighlight()
+		self:SetHighlightEnabled(not self.HighlightEnabled)
+		return self.HighlightEnabled
+	end
 	function esp:Destroy()
 		self:SetEnabled(false)
+		self:SetHighlightEnabled(false)
 		for _, connection in ipairs(self.Connections) do
 			connection:Disconnect()
 		end
 	end
-	table.insert(esp.Connections, Players.PlayerAdded:Connect(addPlayer))
+	table.insert(esp.Connections, Players.PlayerAdded:Connect(function(player)
+		addPlayer(player)
+		addHighlight(player)
+	end))
 	table.insert(esp.Connections, Players.PlayerRemoving:Connect(function(player)
 		removePlayer(player)
+		removeHighlight(player)
 		esp.CharacterConnections[player] = nil
+		esp.HighlightCharacterConnections[player] = nil
 	end))
 	return esp
 end
@@ -372,6 +433,27 @@ local function createModal(gui, playerESP)
 	playerToggle.AutoButtonColor = true
 	playerToggle.Visible = false
 	playerToggle.Parent = content
+	local highlightToggle = Instance.new("TextButton")
+	highlightToggle.Name = "PlayerHighlightToggle"
+	highlightToggle.Size = UDim2.fromOffset(180, 38)
+	highlightToggle.Position = UDim2.fromOffset(24, 166)
+	highlightToggle.Text = "Highlight: OFF"
+	highlightToggle.Font = Enum.Font.GothamBold
+	highlightToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	highlightToggle.TextSize = 14
+	highlightToggle.BackgroundColor3 = CONFIG.Modal.MenuColor
+	highlightToggle.BorderSizePixel = 0
+	highlightToggle.AutoButtonColor = true
+	highlightToggle.Visible = false
+	highlightToggle.Parent = content
+	local highlightCorner = Instance.new("UICorner")
+	highlightCorner.CornerRadius = UDim.new(0, 5)
+	highlightCorner.Parent = highlightToggle
+	highlightToggle.MouseButton1Click:Connect(function()
+		local enabled = playerESP:ToggleHighlight()
+		highlightToggle.Text = enabled and "Highlight: ON" or "Highlight: OFF"
+		highlightToggle.BackgroundColor3 = enabled and CONFIG.Modal.MenuActiveColor or CONFIG.Modal.MenuColor
+	end)
 	local pingStatus = Instance.new("TextLabel")
 	pingStatus.Name = "MiscPingStatus"
 	pingStatus.Size = UDim2.new(1, -48, 0, 24)
@@ -386,8 +468,8 @@ local function createModal(gui, playerESP)
 	pingStatus.Parent = content
 	local playerList = Instance.new("ScrollingFrame")
 	playerList.Name = "PlayerList"
-	playerList.Size = UDim2.new(1, -48, 1, -210)
-	playerList.Position = UDim2.fromOffset(24, 174)
+	playerList.Size = UDim2.new(1, -48, 1, -258)
+	playerList.Position = UDim2.fromOffset(24, 214)
 	playerList.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
 	playerList.BorderSizePixel = 0
 	playerList.ScrollBarThickness = 6
@@ -506,6 +588,7 @@ local function createModal(gui, playerESP)
 			logsList.Visible = item.Name == "Logs"
 			contentBody.Visible = item.Name ~= "Logs"
 			playerToggle.Visible = item.Name == "Misc"
+			highlightToggle.Visible = item.Name == "Misc"
 			pingStatus.Visible = item.Name == "Misc"
 			playerList.Visible = item.Name == "Misc"
 			if item.Name == "Misc" then
