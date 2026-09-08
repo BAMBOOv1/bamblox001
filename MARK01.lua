@@ -8,7 +8,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.5",
+	Version = "0.0.6",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -428,10 +428,8 @@ local function createModal(gui, playerESP)
 			label.Size = UDim2.new(1, -16, 0, 28)
 			label.BackgroundTransparency = 1
 			local ping = playerPings[target.UserId]
-			label.Text = target.DisplayName .. " (" .. target.Name .. ") - " .. (ping and (ping .. " ms") or "--")
-			if target == Players.LocalPlayer then
-				label.Text ..= " [YOU]"
-			end
+			local youLabel = target == Players.LocalPlayer and " [YOU]" or ""
+			label.Text = target.DisplayName .. " (" .. target.Name .. ")" .. youLabel .. " ----- " .. (ping and (ping .. " ms") or "--")
 			label.Font = Enum.Font.Gotham
 			label.TextColor3 = target == Players.LocalPlayer and CONFIG.Button.TextColor or Color3.fromRGB(235, 235, 235)
 			label.TextSize = 14
