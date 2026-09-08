@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.3",
+	Version = "0.0.4",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -371,6 +371,75 @@ local function createModal(gui, playerESP)
 	playerToggle.AutoButtonColor = true
 	playerToggle.Visible = false
 	playerToggle.Parent = content
+	local pingStatus = Instance.new("TextLabel")
+	pingStatus.Name = "MiscPingStatus"
+	pingStatus.Size = UDim2.new(1, -48, 0, 24)
+	pingStatus.Position = UDim2.fromOffset(24, 96)
+	pingStatus.BackgroundTransparency = 1
+	pingStatus.Text = "Client Ping: --"
+	pingStatus.Font = Enum.Font.Code
+	pingStatus.TextColor3 = Color3.fromRGB(190, 190, 190)
+	pingStatus.TextSize = 14
+	pingStatus.TextXAlignment = Enum.TextXAlignment.Left
+	pingStatus.Visible = false
+	pingStatus.Parent = content
+	local playerList = Instance.new("ScrollingFrame")
+	playerList.Name = "PlayerList"
+	playerList.Size = UDim2.new(1, -48, 1, -210)
+	playerList.Position = UDim2.fromOffset(24, 174)
+	playerList.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+	playerList.BorderSizePixel = 0
+	playerList.ScrollBarThickness = 6
+	playerList.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+	playerList.CanvasSize = UDim2.fromOffset(0, 0)
+	playerList.Visible = false
+	playerList.Parent = content
+	local playerListPadding = Instance.new("UIPadding")
+	playerListPadding.PaddingTop = UDim.new(0, 8)
+	playerListPadding.PaddingBottom = UDim.new(0, 8)
+	playerListPadding.PaddingLeft = UDim.new(0, 8)
+	playerListPadding.PaddingRight = UDim.new(0, 8)
+	playerListPadding.Parent = playerList
+	local playerListLayout = Instance.new("UIListLayout")
+	playerListLayout.Padding = UDim.new(0, 4)
+	playerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	playerListLayout.Parent = playerList
+	local function refreshPlayerList()
+		for _, child in ipairs(playerList:GetChildren()) do
+			if child:IsA("TextLabel") then
+				child:Destroy()
+			end
+		end
+		for index, target in ipairs(Players:GetPlayers()) do
+			local label = Instance.new("TextLabel")
+			label.Name = "PlayerEntry"
+			label.Size = UDim2.new(1, -16, 0, 28)
+			label.BackgroundTransparency = 1
+			label.Text = target.DisplayName .. " (" .. target.Name .. ")"
+			if target == Players.LocalPlayer then
+				label.Text ..= " [YOU]"
+			end
+			label.Font = Enum.Font.Gotham
+			label.TextColor3 = target == Players.LocalPlayer and CONFIG.Button.TextColor or Color3.fromRGB(235, 235, 235)
+			label.TextSize = 14
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			label.LayoutOrder = index
+			label.Parent = playerList
+		end
+		playerList.CanvasSize = UDim2.fromOffset(0, playerListLayout.AbsoluteContentSize.Y + 16)
+	end
+	Players.PlayerAdded:Connect(refreshPlayerList)
+	Players.PlayerRemoving:Connect(refreshPlayerList)
+	refreshPlayerList()
+	RunService.RenderStepped:Connect(function()
+		if not pingStatus.Visible then
+			return
+		end
+		local success, ping = pcall(function()
+			return Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
+		end)
+		pingStatus.Text = "Client Ping: " .. (success and ping or "--")
+	end)
 	local playerToggleCorner = Instance.new("UICorner")
 	playerToggleCorner.CornerRadius = UDim.new(0, 5)
 	playerToggleCorner.Parent = playerToggle
@@ -417,6 +486,11 @@ local function createModal(gui, playerESP)
 			logsList.Visible = item.Name == "Logs"
 			contentBody.Visible = item.Name ~= "Logs"
 			playerToggle.Visible = item.Name == "Misc"
+			pingStatus.Visible = item.Name == "Misc"
+			playerList.Visible = item.Name == "Misc"
+			if item.Name == "Misc" then
+				refreshPlayerList()
+			end
 		end)
 	end
 	local minimizeButton = Instance.new("TextButton")
