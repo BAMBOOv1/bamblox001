@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.11",
+	Version = "0.0.12",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -405,6 +405,105 @@ local function createModal(gui, playerESP)
 	contentBody.TextSize = 14
 	contentBody.TextXAlignment = Enum.TextXAlignment.Left
 	contentBody.Parent = content
+	local miscTools = Instance.new("Frame")
+	miscTools.Name = "MiscTools"
+	miscTools.Size = UDim2.new(0.5, -40, 1, -112)
+	miscTools.Position = UDim2.fromOffset(32, 104)
+	miscTools.BackgroundTransparency = 1
+	miscTools.Visible = false
+	miscTools.Parent = content
+	local playerToggle = createToggleRow(miscTools, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(0, 16), function(enabled)
+		playerESP:SetEnabled(enabled)
+	end)
+	local highlightToggle = createToggleRow(miscTools, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(0, 66), function(enabled)
+		playerESP:SetHighlightEnabled(enabled)
+	end)
+	local teleportPanel = Instance.new("Frame")
+	teleportPanel.Name = "TeleportPanel"
+	teleportPanel.Size = UDim2.new(0.5, -40, 1, -112)
+	teleportPanel.Position = UDim2.new(0.5, 8, 0, 104)
+	teleportPanel.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
+	teleportPanel.BorderSizePixel = 0
+	teleportPanel.Visible = false
+	teleportPanel.Parent = content
+	local teleportCorner = Instance.new("UICorner")
+	teleportCorner.CornerRadius = UDim.new(0, 10)
+	teleportCorner.Parent = teleportPanel
+	local teleportTitle = Instance.new("TextLabel")
+	teleportTitle.Name = "TeleportTitle"
+	teleportTitle.Size = UDim2.new(1, -24, 0, 30)
+	teleportTitle.Position = UDim2.fromOffset(12, 10)
+	teleportTitle.BackgroundTransparency = 1
+	teleportTitle.Text = "TELEPORT"
+	teleportTitle.Font = Enum.Font.GothamBold
+	teleportTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
+	teleportTitle.TextSize = 13
+	teleportTitle.TextXAlignment = Enum.TextXAlignment.Left
+	teleportTitle.Parent = teleportPanel
+	local teleportList = Instance.new("ScrollingFrame")
+	teleportList.Name = "TeleportPlayerList"
+	teleportList.Size = UDim2.new(1, -20, 1, -52)
+	teleportList.Position = UDim2.fromOffset(10, 46)
+	teleportList.BackgroundColor3 = Color3.fromRGB(22, 24, 29)
+	teleportList.BorderSizePixel = 0
+	teleportList.ScrollBarThickness = 4
+	teleportList.ScrollBarImageColor3 = Color3.fromRGB(71, 85, 105)
+	teleportList.CanvasSize = UDim2.fromOffset(0, 0)
+	teleportList.Parent = teleportPanel
+	local teleportListPadding = Instance.new("UIPadding")
+	teleportListPadding.PaddingTop = UDim.new(0, 6)
+	teleportListPadding.PaddingBottom = UDim.new(0, 6)
+	teleportListPadding.PaddingLeft = UDim.new(0, 6)
+	teleportListPadding.PaddingRight = UDim.new(0, 6)
+	teleportListPadding.Parent = teleportList
+	local teleportLayout = Instance.new("UIListLayout")
+	teleportLayout.Padding = UDim.new(0, 5)
+	teleportLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	teleportLayout.Parent = teleportList
+	local function teleportToPlayer(target)
+		local localCharacter = Players.LocalPlayer.Character
+		local targetCharacter = target.Character
+		if localCharacter and targetCharacter then
+			local targetRoot = targetCharacter:FindFirstChild("HumanoidRootPart")
+			if targetRoot then
+				localCharacter:PivotTo(targetRoot.CFrame * CFrame.new(0, 0, 3))
+			end
+		end
+	end
+	local function refreshTeleportPlayers()
+		for _, child in ipairs(teleportList:GetChildren()) do
+			if child:IsA("TextButton") then
+				child:Destroy()
+			end
+		end
+		for index, target in ipairs(Players:GetPlayers()) do
+			local teleportButton = Instance.new("TextButton")
+			teleportButton.Name = "TeleportToPlayer"
+			teleportButton.Size = UDim2.new(1, 0, 0, 34)
+			teleportButton.Text = target.DisplayName .. " (" .. target.Name .. ")"
+			teleportButton.Font = Enum.Font.Gotham
+			teleportButton.TextColor3 = Color3.fromRGB(209, 213, 219)
+			teleportButton.TextSize = 13
+			teleportButton.TextXAlignment = Enum.TextXAlignment.Left
+			teleportButton.BackgroundColor3 = Color3.fromRGB(42, 46, 54)
+			teleportButton.BorderSizePixel = 0
+			teleportButton.LayoutOrder = index
+			teleportButton.Parent = teleportList
+			local buttonPadding = Instance.new("UIPadding")
+			buttonPadding.PaddingLeft = UDim.new(0, 10)
+			buttonPadding.Parent = teleportButton
+			local buttonCorner = Instance.new("UICorner")
+			buttonCorner.CornerRadius = UDim.new(0, 6)
+			buttonCorner.Parent = teleportButton
+			teleportButton.MouseButton1Click:Connect(function()
+				teleportToPlayer(target)
+			end)
+		end
+		teleportList.CanvasSize = UDim2.fromOffset(0, teleportLayout.AbsoluteContentSize.Y + 12)
+	end
+	Players.PlayerAdded:Connect(refreshTeleportPlayers)
+	Players.PlayerRemoving:Connect(refreshTeleportPlayers)
+	refreshTeleportPlayers()
 	local logsList = Instance.new("ScrollingFrame")
 	logsList.Name = "LogsList"
 	logsList.Size = UDim2.new(1, -64, 1, -128)
@@ -545,6 +644,8 @@ local function createModal(gui, playerESP)
 			contentBody.Visible = item.Name ~= "Logs"
 			playerToggle.Visible = item.Name == "Misc"
 			highlightToggle.Visible = item.Name == "Misc"
+			miscTools.Visible = item.Name == "Misc"
+			teleportPanel.Visible = item.Name == "Misc"
 		end)
 	end
 	local minimizeButton = Instance.new("TextButton")
