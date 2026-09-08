@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.13",
+	Version = "0.0.14",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -383,32 +383,10 @@ local function createModal(gui, playerESP)
 	content.BackgroundColor3 = CONFIG.Modal.ContentColor
 	content.BorderSizePixel = 0
 	content.Parent = modal
-	local contentTitle = Instance.new("TextLabel")
-	contentTitle.Name = "ContentTitle"
-	contentTitle.Size = UDim2.new(1, -64, 0, 38)
-	contentTitle.Position = UDim2.fromOffset(32, 28)
-	contentTitle.BackgroundTransparency = 1
-	contentTitle.Text = "Home"
-	contentTitle.Font = Enum.Font.GothamBold
-	contentTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-	contentTitle.TextSize = 24
-	contentTitle.TextXAlignment = Enum.TextXAlignment.Left
-	contentTitle.Parent = content
-	local contentBody = Instance.new("TextLabel")
-	contentBody.Name = "ContentBody"
-	contentBody.Size = UDim2.new(1, -64, 0, 28)
-	contentBody.Position = UDim2.fromOffset(32, 68)
-	contentBody.BackgroundTransparency = 1
-	contentBody.Text = "Welcome to MARK 01"
-	contentBody.Font = Enum.Font.Gotham
-	contentBody.TextColor3 = Color3.fromRGB(148, 163, 184)
-	contentBody.TextSize = 14
-	contentBody.TextXAlignment = Enum.TextXAlignment.Left
-	contentBody.Parent = content
 	local miscTools = Instance.new("Frame")
 	miscTools.Name = "MiscTools"
-	miscTools.Size = UDim2.new(0.5, -40, 1, -112)
-	miscTools.Position = UDim2.fromOffset(32, 104)
+	miscTools.Size = UDim2.new(0.5, -40, 1, -64)
+	miscTools.Position = UDim2.fromOffset(32, 32)
 	miscTools.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
 	miscTools.BorderSizePixel = 0
 	miscTools.Visible = false
@@ -435,8 +413,8 @@ local function createModal(gui, playerESP)
 	end)
 	local teleportPanel = Instance.new("Frame")
 	teleportPanel.Name = "TeleportPanel"
-	teleportPanel.Size = UDim2.new(0.5, -40, 1, -112)
-	teleportPanel.Position = UDim2.new(0.5, 8, 0, 104)
+	teleportPanel.Size = UDim2.new(0.5, -40, 1, -64)
+	teleportPanel.Position = UDim2.new(0.5, 8, 0, 32)
 	teleportPanel.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
 	teleportPanel.BorderSizePixel = 0
 	teleportPanel.Visible = false
@@ -521,8 +499,8 @@ local function createModal(gui, playerESP)
 	refreshTeleportPlayers()
 	local logsList = Instance.new("ScrollingFrame")
 	logsList.Name = "LogsList"
-	logsList.Size = UDim2.new(1, -64, 1, -128)
-	logsList.Position = UDim2.fromOffset(32, 104)
+	logsList.Size = UDim2.new(1, -64, 1, -64)
+	logsList.Position = UDim2.fromOffset(32, 32)
 	logsList.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
 	logsList.BorderSizePixel = 0
 	logsList.ScrollBarThickness = 4
@@ -647,10 +625,7 @@ local function createModal(gui, playerESP)
 			end
 			menuButton.BackgroundColor3 = CONFIG.Modal.MenuActiveColor
 			menuButton.TextColor3 = Color3.fromRGB(236, 253, 245)
-			contentTitle.Text = item.Name
-			contentBody.Text = item.Description
 			logsList.Visible = item.Name == "Logs"
-			contentBody.Visible = item.Name ~= "Logs"
 			playerToggle.Visible = item.Name == "Misc"
 			highlightToggle.Visible = item.Name == "Misc"
 			miscTools.Visible = item.Name == "Misc"
