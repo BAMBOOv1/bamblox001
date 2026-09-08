@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.14",
+	Version = "0.0.15",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -394,21 +394,45 @@ local function createModal(gui, playerESP)
 	local miscToolsCorner = Instance.new("UICorner")
 	miscToolsCorner.CornerRadius = UDim.new(0, 10)
 	miscToolsCorner.Parent = miscTools
-	local miscToolsTitle = Instance.new("TextLabel")
+	local miscToolsTitle = Instance.new("TextButton")
 	miscToolsTitle.Name = "PlayerControlsTitle"
-	miscToolsTitle.Size = UDim2.new(1, -24, 0, 30)
-	miscToolsTitle.Position = UDim2.fromOffset(12, 10)
+	miscToolsTitle.Size = UDim2.new(1, -60, 0, 40)
+	miscToolsTitle.Position = UDim2.fromOffset(12, 8)
 	miscToolsTitle.BackgroundTransparency = 1
 	miscToolsTitle.Text = "PLAYER CONTROLS"
 	miscToolsTitle.Font = Enum.Font.GothamBold
 	miscToolsTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
 	miscToolsTitle.TextSize = 13
 	miscToolsTitle.TextXAlignment = Enum.TextXAlignment.Left
+	miscToolsTitle.AutoButtonColor = false
 	miscToolsTitle.Parent = miscTools
-	local playerToggle = createToggleRow(miscTools, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(12, 54), function(enabled)
+	local miscToolsArrow = Instance.new("TextLabel")
+	miscToolsArrow.Name = "DropdownArrow"
+	miscToolsArrow.Size = UDim2.fromOffset(24, 40)
+	miscToolsArrow.Position = UDim2.new(1, -40, 0, 8)
+	miscToolsArrow.BackgroundTransparency = 1
+	miscToolsArrow.Text = "âŒƒ"
+	miscToolsArrow.Font = Enum.Font.GothamBold
+	miscToolsArrow.TextColor3 = Color3.fromRGB(148, 163, 184)
+	miscToolsArrow.TextSize = 18
+	miscToolsArrow.Parent = miscTools
+	local miscToolsList = Instance.new("ScrollingFrame")
+	miscToolsList.Name = "PlayerControlsList"
+	miscToolsList.Size = UDim2.new(1, -20, 1, -62)
+	miscToolsList.Position = UDim2.fromOffset(10, 52)
+	miscToolsList.BackgroundColor3 = Color3.fromRGB(22, 24, 29)
+	miscToolsList.BorderSizePixel = 0
+	miscToolsList.ScrollBarThickness = 4
+	miscToolsList.ScrollBarImageColor3 = Color3.fromRGB(71, 85, 105)
+	miscToolsList.CanvasSize = UDim2.fromOffset(0, 146)
+	miscToolsList.Parent = miscTools
+	local miscToolsListCorner = Instance.new("UICorner")
+	miscToolsListCorner.CornerRadius = UDim.new(0, 8)
+	miscToolsListCorner.Parent = miscToolsList
+	local playerToggle = createToggleRow(miscToolsList, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(0, 8), function(enabled)
 		playerESP:SetEnabled(enabled)
 	end)
-	local highlightToggle = createToggleRow(miscTools, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(12, 104), function(enabled)
+	local highlightToggle = createToggleRow(miscToolsList, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(0, 58), function(enabled)
 		playerESP:SetHighlightEnabled(enabled)
 	end)
 	local teleportPanel = Instance.new("Frame")
@@ -422,21 +446,32 @@ local function createModal(gui, playerESP)
 	local teleportCorner = Instance.new("UICorner")
 	teleportCorner.CornerRadius = UDim.new(0, 10)
 	teleportCorner.Parent = teleportPanel
-	local teleportTitle = Instance.new("TextLabel")
+	local teleportTitle = Instance.new("TextButton")
 	teleportTitle.Name = "TeleportTitle"
-	teleportTitle.Size = UDim2.new(1, -24, 0, 30)
-	teleportTitle.Position = UDim2.fromOffset(12, 10)
+	teleportTitle.Size = UDim2.new(1, -60, 0, 40)
+	teleportTitle.Position = UDim2.fromOffset(12, 8)
 	teleportTitle.BackgroundTransparency = 1
 	teleportTitle.Text = "TELEPORT"
 	teleportTitle.Font = Enum.Font.GothamBold
 	teleportTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
 	teleportTitle.TextSize = 13
 	teleportTitle.TextXAlignment = Enum.TextXAlignment.Left
+	teleportTitle.AutoButtonColor = false
 	teleportTitle.Parent = teleportPanel
+	local teleportArrow = Instance.new("TextLabel")
+	teleportArrow.Name = "DropdownArrow"
+	teleportArrow.Size = UDim2.fromOffset(24, 40)
+	teleportArrow.Position = UDim2.new(1, -40, 0, 8)
+	teleportArrow.BackgroundTransparency = 1
+	teleportArrow.Text = "âŒƒ"
+	teleportArrow.Font = Enum.Font.GothamBold
+	teleportArrow.TextColor3 = Color3.fromRGB(148, 163, 184)
+	teleportArrow.TextSize = 18
+	teleportArrow.Parent = teleportPanel
 	local teleportList = Instance.new("ScrollingFrame")
 	teleportList.Name = "TeleportPlayerList"
-	teleportList.Size = UDim2.new(1, -20, 1, -52)
-	teleportList.Position = UDim2.fromOffset(10, 46)
+	teleportList.Size = UDim2.new(1, -20, 1, -62)
+	teleportList.Position = UDim2.fromOffset(10, 52)
 	teleportList.BackgroundColor3 = Color3.fromRGB(22, 24, 29)
 	teleportList.BorderSizePixel = 0
 	teleportList.ScrollBarThickness = 4
@@ -589,6 +624,18 @@ local function createModal(gui, playerESP)
 	end
 	LogService.MessageOut:Connect(function(message, messageType)
 		addLog(message, messageType)
+	end)
+	local miscToolsExpanded = true
+	miscToolsTitle.MouseButton1Click:Connect(function()
+		miscToolsExpanded = not miscToolsExpanded
+		miscToolsList.Visible = miscToolsExpanded
+		miscToolsArrow.Text = miscToolsExpanded and "âŒƒ" or "âŒ„"
+	end)
+	local teleportExpanded = true
+	teleportTitle.MouseButton1Click:Connect(function()
+		teleportExpanded = not teleportExpanded
+		teleportList.Visible = teleportExpanded
+		teleportArrow.Text = teleportExpanded and "âŒƒ" or "âŒ„"
 	end)
 	local menuButtons = {}
 	local menuItems = {
