@@ -3,11 +3,12 @@ local UserInputService = game:GetService("UserInputService")
 local LogService = game:GetService("LogService")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.4",
+	Version = "0.0.5",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -404,7 +405,18 @@ local function createModal(gui, playerESP)
 	playerListLayout.Padding = UDim.new(0, 4)
 	playerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	playerListLayout.Parent = playerList
+	local pingRemote = ReplicatedStorage:FindFirstChild("MARK01_GetPlayerPings")
+	local playerPings = {}
 	local function refreshPlayerList()
+		pingRemote = pingRemote or ReplicatedStorage:FindFirstChild("MARK01_GetPlayerPings")
+		if pingRemote then
+			local success, result = pcall(function()
+				return pingRemote:InvokeServer()
+			end)
+			if success and type(result) == "table" then
+				playerPings = result
+			end
+		end
 		for _, child in ipairs(playerList:GetChildren()) do
 			if child:IsA("TextLabel") then
 				child:Destroy()
@@ -415,7 +427,8 @@ local function createModal(gui, playerESP)
 			label.Name = "PlayerEntry"
 			label.Size = UDim2.new(1, -16, 0, 28)
 			label.BackgroundTransparency = 1
-			label.Text = target.DisplayName .. " (" .. target.Name .. ")"
+			local ping = playerPings[target.UserId]
+			label.Text = target.DisplayName .. " (" .. target.Name .. ") - " .. (ping and (ping .. " ms") or "--")
 			if target == Players.LocalPlayer then
 				label.Text ..= " [YOU]"
 			end
@@ -439,6 +452,14 @@ local function createModal(gui, playerESP)
 			return Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
 		end)
 		pingStatus.Text = "Client Ping: " .. (success and ping or "--")
+	end)
+	task.spawn(function()
+		while playerList.Parent do
+			if playerList.Visible then
+				refreshPlayerList()
+			end
+			task.wait(1)
+		end
 	end)
 	local playerToggleCorner = Instance.new("UICorner")
 	playerToggleCorner.CornerRadius = UDim.new(0, 5)
