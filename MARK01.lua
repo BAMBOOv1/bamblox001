@@ -2,10 +2,12 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local LogService = game:GetService("LogService")
 local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
+	Version = "0.0.1",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -105,6 +107,37 @@ local function createModal(gui)
 	logo.TextSize = 20
 	logo.TextXAlignment = Enum.TextXAlignment.Left
 	logo.Parent = header
+	local headerStatus = Instance.new("TextLabel")
+	headerStatus.Name = "HeaderStatus"
+	headerStatus.Size = UDim2.fromOffset(360, CONFIG.Modal.HeaderHeight)
+	headerStatus.Position = UDim2.new(0.5, -180, 0, 0)
+	headerStatus.BackgroundTransparency = 1
+	headerStatus.Text = "FPS: --  |  Ping: --  |  Ver: " .. CONFIG.Version
+	headerStatus.Font = Enum.Font.Code
+	headerStatus.TextColor3 = Color3.fromRGB(170, 170, 170)
+	headerStatus.TextSize = 14
+	headerStatus.TextXAlignment = Enum.TextXAlignment.Center
+	headerStatus.Parent = header
+	local frames = 0
+	local elapsed = 0
+	RunService.RenderStepped:Connect(function(deltaTime)
+		frames += 1
+		elapsed += deltaTime
+		if elapsed < 0.5 then
+			return
+		end
+		local fps = math.floor(frames / elapsed + 0.5)
+		local ping = "--"
+		local success, pingValue = pcall(function()
+			return Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
+		end)
+		if success then
+			ping = pingValue
+		end
+		headerStatus.Text = string.format("FPS: %d  |  Ping: %s  |  Ver: %s", fps, ping, CONFIG.Version)
+		frames = 0
+		elapsed = 0
+	end)
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
 	sidebar.Size = UDim2.new(0, CONFIG.Modal.SidebarWidth, 1, -CONFIG.Modal.HeaderHeight)
