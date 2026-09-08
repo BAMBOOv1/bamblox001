@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.12",
+	Version = "0.0.13",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -409,13 +409,28 @@ local function createModal(gui, playerESP)
 	miscTools.Name = "MiscTools"
 	miscTools.Size = UDim2.new(0.5, -40, 1, -112)
 	miscTools.Position = UDim2.fromOffset(32, 104)
-	miscTools.BackgroundTransparency = 1
+	miscTools.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
+	miscTools.BorderSizePixel = 0
 	miscTools.Visible = false
 	miscTools.Parent = content
-	local playerToggle = createToggleRow(miscTools, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(0, 16), function(enabled)
+	local miscToolsCorner = Instance.new("UICorner")
+	miscToolsCorner.CornerRadius = UDim.new(0, 10)
+	miscToolsCorner.Parent = miscTools
+	local miscToolsTitle = Instance.new("TextLabel")
+	miscToolsTitle.Name = "PlayerControlsTitle"
+	miscToolsTitle.Size = UDim2.new(1, -24, 0, 30)
+	miscToolsTitle.Position = UDim2.fromOffset(12, 10)
+	miscToolsTitle.BackgroundTransparency = 1
+	miscToolsTitle.Text = "PLAYER CONTROLS"
+	miscToolsTitle.Font = Enum.Font.GothamBold
+	miscToolsTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
+	miscToolsTitle.TextSize = 13
+	miscToolsTitle.TextXAlignment = Enum.TextXAlignment.Left
+	miscToolsTitle.Parent = miscTools
+	local playerToggle = createToggleRow(miscTools, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(12, 54), function(enabled)
 		playerESP:SetEnabled(enabled)
 	end)
-	local highlightToggle = createToggleRow(miscTools, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(0, 66), function(enabled)
+	local highlightToggle = createToggleRow(miscTools, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(12, 104), function(enabled)
 		playerESP:SetHighlightEnabled(enabled)
 	end)
 	local teleportPanel = Instance.new("Frame")
@@ -596,12 +611,6 @@ local function createModal(gui, playerESP)
 	end
 	LogService.MessageOut:Connect(function(message, messageType)
 		addLog(message, messageType)
-	end)
-	local playerToggle = createToggleRow(content, "PlayerNamesToggle", "ESP Player", UDim2.fromOffset(32, 120), function(enabled)
-		playerESP:SetEnabled(enabled)
-	end)
-	local highlightToggle = createToggleRow(content, "PlayerHighlightToggle", "Player Highlight", UDim2.fromOffset(32, 170), function(enabled)
-		playerESP:SetHighlightEnabled(enabled)
 	end)
 	local menuButtons = {}
 	local menuItems = {
