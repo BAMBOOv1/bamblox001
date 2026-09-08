@@ -8,7 +8,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local CONFIG = {
 	GuiName = "HelloWorldUI",
-	Version = "0.0.6",
+	Version = "0.0.7",
 	Button = {
 		Size = UDim2.fromOffset(46, 46),
 		Position = UDim2.fromOffset(100, 100),
@@ -473,6 +473,7 @@ local function createModal(gui, playerESP)
 		{Name = "Settings", Description = "Configure your preferences"},
 		{Name = "Logs", Description = "Client output logs"},
 		{Name = "Misc", Description = "Extra map testing tools"},
+		{Name = "Lighting", Description = "Lighting controls for map testing"},
 	}
 	for index, item in ipairs(menuItems) do
 		local menuButton = Instance.new("TextButton")
